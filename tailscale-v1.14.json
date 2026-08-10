@@ -1,0 +1,42 @@
+{
+  "log": { "level": "info", "timestamp": true },
+  "ntp": { "enabled": true, "server": "time.apple.com" },
+  "certificate_providers": [{ "type": "tailscale", "tag": "ts-cert", "endpoint": "ts-ep" }],
+  "dns": {
+    "servers": [
+      { "type": "local", "tag": "local-dns" },
+      { "type": "tailscale", "tag": "ts-dns", "endpoint": "ts-ep", "accept_search_domain": true }
+    ],
+    "rules": [{ "preferred_by": "ts-dns", "server": "ts-dns" }],
+    "final": "local-dns"
+  },
+  "endpoints": [{ "type": "tailscale", "tag": "ts-ep", "system_interface": true, "accept_routes": true }],
+  "inbounds": [
+    {
+      "type": "tun",
+      "interface_name": "ETH0",
+      "address": ["172.19.0.0/30", "fdfe:dcba:9876::/126"],
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "mixed"
+    }
+  ],
+  "outbounds": [{ "type": "direct", "tag": "🎯 全球直连" }],
+  "route": {
+    "rules": [
+      { "action": "sniff", "timeout": "500ms" },
+      { "protocol": "dns", "action": "hijack-dns" },
+      { "preferred_by": "ts-ep", "outbound": "ts-ep" }
+    ],
+    "final": "🎯 全球直连",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "local-dns"
+  },
+  "experimental": {
+    "cache_file": { "enabled": true, "store_fakeip": true },
+    "clash_api": {
+      "external_controller": "0.0.0.0:9090",
+      "external_ui_download_url": "https://xget.350090.xyz/gh/Zephyruso/zashboard/archive/gh-pages.zip"
+    }
+  }
+}

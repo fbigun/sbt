@@ -1,0 +1,8 @@
+FROM cnbcool/default-dev-env:latest
+
+RUN npm install --global prettier && \
+    apt-get install --yes --no-install-recommends \
+        make python3 python3-jsonschema jq curl tar && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    code-server --install-extension esbenp.prettier-vscode

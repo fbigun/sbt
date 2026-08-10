@@ -1,0 +1,19 @@
+{
+  // 1. 开启保存时格式化（核心开关）
+  "editor.formatOnSave": true,
+
+  // 2. 将 Prettier 设置为默认格式化工具（全局生效）
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 3. 针对 JSON 文件单独指定（可选，确保 JSON 用 Prettier 格式化）
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // 4. 这里是你刚才问的“宽度限制”设置（例如设置为 100 或 10000）
+  "prettier.printWidth": 120,
+
+  // 其他常用 Prettier 设置
+  "prettier.tabWidth": 2,
+  "prettier.useTabs": false
+}

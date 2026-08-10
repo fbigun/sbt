@@ -1,0 +1,12 @@
+$:
+  vscode:
+    - docker:
+        build: .cnb/Dockerfile.vscode
+        image: cnbcool/default-dev-env:latest
+      services:
+        - vscode
+        - docker
+      stages:
+        - name: hello
+          script: |
+            echo "hello"
