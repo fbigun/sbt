@@ -1,0 +1,143 @@
+{
+  "$schema": "./schema_v1.15.json",
+  "log": { "level": "trace", "timestamp": true },
+  "ntp": { "enabled": true, "server": "time.apple.com" },
+  "certificate_providers": [{ "type": "tailscale", "tag": "ts-cert", "endpoint": "ts-ep" }],
+  "dns": {
+    "servers": [
+      {
+        "type": "https",
+        "tag": "dnspod",
+        "domain_resolver": "dnspod-udp",
+        "server": "doh.pub"
+      },
+      { "type": "udp", "tag": "dnspod-udp", "server": "119.29.29.29" },
+      { "type": "tailscale", "tag": "ts-dns", "endpoint": "ts-ep", "accept_search_domain": true },
+      {
+        "type": "fakeip",
+        "tag": "fakeip",
+        "inet4_range": "198.18.0.0/15"
+      }
+    ],
+    "rules": [
+      { "clash_mode": "Direct", "server": "dnspod" },
+      { "clash_mode": "Global", "server": "fakeip" },
+      { "wifi_bssid": ["68:77:24:8d:2d:bd", "68:77:24:8d:2d:bb"], "preferred_by": "ts-dns", "server": "dnspod" },
+      { "preferred_by": "ts-dns", "server": "ts-dns" },
+      { "rule_set": "geosite_ads", "action": "reject" },
+      { "rule_set": ["geosite_cn", "geosite_fakeipfilter"], "server": "dnspod" },
+      { "query_type": ["A", "AAAA"], "server": "fakeip", "rewrite_ttl": 1 }
+    ],
+    "final": "dnspod",
+    "strategy": "prefer_ipv4",
+    "client_subnet": "112.10.101.0/24"
+  },
+  "http_clients": [{ "engine": "go", "tag": "direct-http" }],
+  "endpoints": [
+    {
+      "type": "tailscale",
+      "tag": "ts-ep",
+      "hostname": "",
+      "accept_routes": true,
+      "exit_node": "",
+      "exit_node_allow_lan_access": true,
+      "advertise_routes": [],
+      "advertise_exit_node": true
+    }
+  ],
+  "inbounds": [
+    {
+      "type": "tun",
+      "interface_name": "ETH0",
+      "address": ["172.19.0.0/30", "fdfe:dcba:9876::/126"],
+      "auto_route": true,
+      "strict_route": true,
+      "route_exclude_address_set": "geoip_cn"
+    }
+  ],
+  "outbounds": [
+    { "type": "direct", "tag": "🎯 全球直连" },
+    {
+      "type": "selector",
+      "tag": "🚀 节点选择",
+      "outbounds": ["🔯 香港节点", "🔴 日本节点", "✨ 美国节点", "♻️ 自动选择", "🐸 手动切换"],
+      "default": "♻️ 自动选择"
+    },
+    {
+      "type": "selector",
+      "tag": "🐟 漏网之鱼",
+      "outbounds": ["🎯 全球直连", "🚀 节点选择"],
+      "default": "🎯 全球直连"
+    },
+    {
+      "type": "selector",
+      "tag": "🌐 全局模式",
+      "outbounds": ["🎯 全球直连", "🚀 节点选择"],
+      "default": "🚀 节点选择"
+    },
+    { "type": "selector", "tag": "🐸 手动切换", "outbounds": [] },
+    { "type": "urltest", "tag": "♻️ 自动选择", "outbounds": [] },
+    { "type": "urltest", "tag": "🔯 香港节点", "outbounds": [] },
+    { "type": "urltest", "tag": "🔴 日本节点", "outbounds": [] },
+    { "type": "urltest", "tag": "✨ 美国节点", "outbounds": [] }
+  ],
+  "route": {
+    "rules": [
+      { "action": "sniff" },
+      { "protocol": "dns", "action": "hijack-dns" },
+      { "clash_mode": "Direct", "outbound": "🎯 全球直连" },
+      { "clash_mode": "Global", "outbound": "🌐 全局模式" },
+      { "wifi_bssid": ["68:77:24:8d:2d:bd", "68:77:24:8d:2d:bb"], "preferred_by": "ts-ep", "outbound": "🎯 全球直连" },
+      { "preferred_by": "ts-ep", "outbound": "ts-ep" },
+      { "protocol": "bittorrent", "outbound": "🎯 全球直连" },
+      { "rule_set": ["geosite_cn"], "outbound": "🎯 全球直连" },
+      { "rule_set": ["geosite_proxy", "geoip_telegram"], "network": "udp", "port": 443, "action": "reject" },
+      { "rule_set": ["geosite_proxy", "geoip_telegram"], "outbound": "🚀 节点选择" },
+      { "rule_set": "geoip_cn", "outbound": "🎯 全球直连" }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "geosite_ads",
+        "url": "https://xget.180770.xyz/gh/TG-Twilight/AWAvenue-Ads-Rule/raw/main/Filters/AWAvenue-Ads-Rule-Singbox.json",
+        "format": "source"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite_cn",
+        "url": "https://xget.180770.xyz/gh/DustinWin/ruleset_geodata/raw/sing-box-ruleset/cn.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip_cn",
+        "url": "https://xget.180770.xyz/gh/DustinWin/ruleset_geodata/raw/sing-box-ruleset/cnip.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite_fakeipfilter",
+        "url": "https://xget.180770.xyz/gh/DustinWin/ruleset_geodata/raw/sing-box-ruleset/fakeip-filter.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite_proxy",
+        "url": "https://xget.180770.xyz/gh/DustinWin/ruleset_geodata/raw/sing-box-ruleset/proxy.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip_telegram",
+        "url": "https://xget.180770.xyz/gh/MetaCubeX/meta-rules-dat/raw/sing/geo/geoip/telegram.srs"
+      }
+    ],
+    "final": "🐟 漏网之鱼",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "dnspod"
+  },
+  "experimental": {
+    "cache_file": { "enabled": true, "store_fakeip": true },
+    "clash_api": {
+      "external_controller": "0.0.0.0:9090",
+      "external_ui_download_url": "https://xget.180770.xyz/gh/Zephyruso/zashboard/archive/gh-pages.zip",
+      "external_ui_download_detour": "🎯 全球直连"
+    }
+  }
+}
