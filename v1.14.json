@@ -7,13 +7,6 @@
     "servers": [
       {
         "type": "https",
-        "tag": "google",
-        "detour": "🚀 节点选择",
-        "domain_resolver": "dnspod",
-        "server": "dns.google"
-      },
-      {
-        "type": "https",
         "tag": "dnspod",
         "domain_resolver": "dnspod-udp",
         "server": "doh.pub"
@@ -23,8 +16,7 @@
       {
         "type": "fakeip",
         "tag": "fakeip",
-        "inet4_range": "198.18.0.0/15",
-        "inet6_range": "fc00::/18"
+        "inet4_range": "198.18.0.0/15"
       }
     ],
     "rules": [
@@ -100,8 +92,8 @@
       { "preferred_by": "ts-ep", "outbound": "ts-ep" },
       { "protocol": "bittorrent", "outbound": "🎯 全球直连" },
       { "rule_set": ["geosite_cn"], "outbound": "🎯 全球直连" },
+      { "rule_set": ["geosite_proxy", "geoip_telegram"], "network": "udp", "port": 443, "action": "reject" },
       { "rule_set": ["geosite_proxy", "geoip_telegram"], "outbound": "🚀 节点选择" },
-      { "action": "resolve", "server": "google", "client_subnet": "112.10.101.0/24" },
       { "rule_set": "geoip_cn", "outbound": "🎯 全球直连" }
     ],
     "rule_set": [
